@@ -2,23 +2,24 @@ import { Amm } from '@jup-ag/core'
 import JSBI from 'jsbi'
 import { PublicKey, AccountInfo, TransactionInstruction } from '@solana/web3.js'
 import { BN, BorshAccountsCoder, utils, web3 } from '@project-serum/anchor'
+import { TOKEN_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token'
 
-import {
-  calcNormalizedWeight,
-  calcOutGivenInSwap,
-  calcPriceImpactSwap,
-} from './helper'
-
-import { BALANSOL_PROGRAM, IDL } from './constant'
 import {
   AccountInfoMap,
   Quote,
   QuoteParams,
   SwapParams,
 } from '../jupiterCore/type'
-import { BalansolMarketParams, PoolData } from './type'
 import { mapAddressToAccountInfos } from '../jupiterCore/wrapJupiterCore'
-import { TOKEN_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token'
+
+// Balansol AMM
+import {
+  calcNormalizedWeight,
+  calcOutGivenInSwap,
+  calcPriceImpactSwap,
+} from './helper'
+import { BALANSOL_PROGRAM, IDL } from './constant'
+import { BalansolMarketParams, PoolData } from './type'
 
 const balansolCoder = new BorshAccountsCoder(IDL)
 

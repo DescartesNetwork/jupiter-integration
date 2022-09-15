@@ -1,7 +1,8 @@
 import { BN, utils } from '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
 
-import { BALANSOL_PROGRAM, BALANSOL_PROGRAM_ID } from '../balansolAmm/constant'
+// Balansol AMM
+import { BALANSOL_PROGRAM, BALANSOL_PROGRAM_ID } from './constant'
 import { PoolPairData } from './type'
 
 const PRECISION = 10 ** 9

@@ -4,6 +4,7 @@ import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet'
 
 import { SOLANA_RPC_ENDPOINT } from '../constants'
 
+// Balansol AMM
 import { BalancerAmm } from './type'
 
 export const IDL: BalancerAmm = {
