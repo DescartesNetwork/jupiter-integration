@@ -9,16 +9,13 @@ export const ENV: Cluster = (process.env.CLUSTER as Cluster) || "mainnet-beta";
 
 // Sometimes, your RPC endpoint may reject you if you spam too many RPC calls. Sometimes, your PRC server
 // may have invalid cache and cause problems.
-export const SOLANA_RPC_ENDPOINT =
-  ENV === "devnet"
-    ? "https://api.devnet.solana.com"
-    : "https://ssc-dao.genesysgo.net";
+export const SOLANA_RPC_ENDPOINT = ENV === "devnet" ? "https://api.devnet.solana.com" : "https://ssc-dao.genesysgo.net";
 
 // Wallets
-export const WALLET_PRIVATE_KEY =
-  process.env.WALLET_PRIVATE_KEY || "PASTE YOUR WALLET PRIVATE KEY";
-export const USER_PRIVATE_KEY = bs58.decode(WALLET_PRIVATE_KEY);
-export const USER_KEYPAIR = Keypair.fromSecretKey(USER_PRIVATE_KEY);
+export const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY;
+
+//"PASTE YOUR WALLET PRIVATE KEY"
+export const USER_KEYPAIR = Keypair.generate();
 
 // Token Mints
 export const INPUT_MINT_ADDRESS =
