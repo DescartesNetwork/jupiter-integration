@@ -9059,6 +9059,7 @@ function ammFactory(address, accountInfo, params) {
 }
 
 const fetchMarketCache = async (url) => {
+  return wrapJupiterCore.fetchMarketCache(url)
   const marketsCache = await (await fetch__default['default'](url)).json()
   return marketsCache
 }
@@ -9123,6 +9124,7 @@ async function getAllAmms(connection, marketsCache) {
 
     return acc
   }, new Array())
+
   await prefetchAmms(
     amms.filter((amm) => amm.shouldPrefetch),
     connection,
@@ -10350,6 +10352,7 @@ function getQuoteAndSortBasedOnOutAmount({
           amm: amm,
         }
       } catch (e) {
+        console.log('error', e)
         return undefined
       }
     })
@@ -10622,6 +10625,7 @@ function processInputRouteSegmentToRoutesInfos({
             swapMode === exports.SwapMode.ExactIn ? amountAfterFees : amount
           otherAmountThreshold = legOtherAmountThreshold
         } catch (e) {
+          console.log('error', e)
           return undefined
         }
       }

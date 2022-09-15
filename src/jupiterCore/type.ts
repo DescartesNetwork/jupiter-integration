@@ -55,10 +55,7 @@ export interface Amm {
   getQuote(quoteParams: QuoteParams): Quote
   createSwapInstructions(swapParams: SwapParams): TransactionInstruction[]
 }
-export declare const mapAddressToAccountInfos: (
-  accountInfoMap: AccountInfoMap,
-  addresses: PublicKey[],
-) => AccountInfo<Buffer>[]
+
 export declare const tokenAccountsToJSBIs: (
   tokenAccounts: TokenAccountInfo[],
 ) => JSBI[]

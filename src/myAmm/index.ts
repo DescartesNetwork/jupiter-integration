@@ -1,7 +1,7 @@
 import { Amm } from '@jup-ag/core'
 import JSBI from 'jsbi'
 import { PublicKey, AccountInfo, TransactionInstruction } from '@solana/web3.js'
-import { web3 } from '@project-serum/anchor'
+import { BorshAccountsCoder, web3 } from '@project-serum/anchor'
 
 import {
   calcNormalizedWeight,
@@ -9,17 +9,17 @@ import {
   calcPriceImpactSwap,
 } from './helper'
 
-// import { IDL } from './constant'
+import { IDL } from './constant'
 import {
   AccountInfoMap,
-  mapAddressToAccountInfos,
   Quote,
   QuoteParams,
   SwapParams,
 } from '../jupiterCore/type'
 import { PoolData } from './type'
+import { mapAddressToAccountInfos } from '../jupiterCore/wrapJupiterCore'
 
-const balansolCoder = {} as any //new BorshAccountsCoder(IDL)
+const balansolCoder = new BorshAccountsCoder(IDL)
 
 export class BalansolAmm implements Amm {
   label: string
@@ -34,15 +34,14 @@ export class BalansolAmm implements Amm {
     accountInfo: AccountInfo<Buffer>,
     params: any,
   ) {
-    this.label = 'Balansol'
-    this.id = address.toBase58()
-    this.reserveTokenMints = []
-
-    this.shouldPrefetch = false
-    this.exactOutputSupported = false
-
     const poolData: PoolData = balansolCoder.decode('pool', accountInfo.data)
     this.poolData = poolData
+
+    this.label = 'Balansol'
+    this.id = address.toBase58()
+    this.reserveTokenMints = poolData.mints
+    this.shouldPrefetch = false
+    this.exactOutputSupported = false
   }
 
   getAccountsForUpdate(): PublicKey[] {
@@ -59,6 +58,8 @@ export class BalansolAmm implements Amm {
   }
 
   getQuote({ sourceMint, destinationMint, amount }: QuoteParams): Quote {
+    console.log('getQuote')
+    // Validate mint state
     if (!this.poolData) throw new Error('Invalid Pool Data')
     const mintList = this.poolData.mints.map((mint) => mint.toBase58())
     const bidMintIndex = mintList.indexOf(sourceMint.toBase58())
@@ -72,7 +73,7 @@ export class BalansolAmm implements Amm {
       this.poolData.weights[askMintIndex],
     )
 
-    // todo route
+    // Route
     const amountOut = calcOutGivenInSwap(
       Number(amount.toString()),
       this.poolData.reserves[askMintIndex],
@@ -93,11 +94,13 @@ export class BalansolAmm implements Amm {
     const feeRatio = totalFeeRatio.toNumber() / 10 ** 9
     const feeAmount = (amountOut / (1 - feeRatio)) * feeRatio
 
+    console.log('amountOut', amountOut)
+    console.log('OK')
     return {
       notEnoughLiquidity: false,
       inAmount: amount,
-      outAmount: JSBI.BigInt(amountOut),
-      feeAmount: JSBI.BigInt(feeAmount),
+      outAmount: JSBI.BigInt(Math.floor(amountOut)),
+      feeAmount: JSBI.BigInt(Math.floor(feeAmount)),
       feeMint: destinationMint.toBase58(),
       feePct: 0,
       priceImpactPct: priceImpact,

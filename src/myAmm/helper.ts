@@ -1,6 +1,4 @@
-import { AccountInfoMap } from '@jup-ag/core/dist/lib/amm'
 import { BN } from '@project-serum/anchor'
-import { PublicKey } from '@solana/web3.js'
 import { PoolPairData } from './type'
 
 const PRECISION = 10 ** 9
