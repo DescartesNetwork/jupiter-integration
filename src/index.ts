@@ -85,14 +85,16 @@ const getRoutes = async ({
 
     if (routes && routes.routesInfos.length) {
       console.log('Possible number of routes:', routes.routesInfos.length)
+      const bestRoute = routes.routesInfos[0]
       console.log(
         'Best quote: ',
         // @ts-ignore
-        new Decimal(routes.routesInfos[0].outAmount.toString())
+        new Decimal(bestRoute.outAmount.toString())
           .div(10 ** outputToken.decimals)
           .toString(),
         `(${outputToken.symbol})`,
       )
+      console.log('priceImpactPct', bestRoute?.priceImpactPct.toString())
       return routes
     } else {
       return null
@@ -182,7 +184,8 @@ const main = async () => {
 
     console.log('routes', routes)
     // Routes are sorted based on outputAmount, so ideally the first route is the best.
-    // await executeSwap({ jupiter, routeInfo: routes!.routesInfos[0] });
+    // @ts-ignore
+    await executeSwap({ jupiter, routeInfo: routes!.routesInfos[0] })
   } catch (error) {
     console.log({ error })
   }

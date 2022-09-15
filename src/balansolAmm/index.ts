@@ -1,7 +1,7 @@
 import { Amm } from '@jup-ag/core'
 import JSBI from 'jsbi'
 import { PublicKey, AccountInfo, TransactionInstruction } from '@solana/web3.js'
-import { BorshAccountsCoder, web3 } from '@project-serum/anchor'
+import { BN, BorshAccountsCoder, utils, web3 } from '@project-serum/anchor'
 
 import {
   calcNormalizedWeight,
@@ -9,15 +9,16 @@ import {
   calcPriceImpactSwap,
 } from './helper'
 
-import { IDL } from './constant'
+import { BALANSOL_PROGRAM, IDL } from './constant'
 import {
   AccountInfoMap,
   Quote,
   QuoteParams,
   SwapParams,
 } from '../jupiterCore/type'
-import { PoolData } from './type'
+import { BalansolMarketParams, PoolData } from './type'
 import { mapAddressToAccountInfos } from '../jupiterCore/wrapJupiterCore'
+import { TOKEN_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token'
 
 const balansolCoder = new BorshAccountsCoder(IDL)
 
@@ -32,7 +33,7 @@ export class BalansolAmm implements Amm {
   constructor(
     address: PublicKey,
     accountInfo: AccountInfo<Buffer>,
-    params: any,
+    public params: BalansolMarketParams,
   ) {
     const poolData: PoolData = balansolCoder.decode('pool', accountInfo.data)
     this.poolData = poolData
@@ -58,12 +59,23 @@ export class BalansolAmm implements Amm {
   }
 
   getQuote({ sourceMint, destinationMint, amount }: QuoteParams): Quote {
-    console.log('getQuote')
     // Validate mint state
     if (!this.poolData) throw new Error('Invalid Pool Data')
+    if (!this.poolData.state['initialized'])
+      throw new Error('Invalid Pool State')
+
     const mintList = this.poolData.mints.map((mint) => mint.toBase58())
     const bidMintIndex = mintList.indexOf(sourceMint.toBase58())
     const askMintIndex = mintList.indexOf(destinationMint.toBase58())
+
+    // Validate Mint State
+    // @ts-ignore
+    if (!this.poolData.actions[bidMintIndex]['active'])
+      throw new Error('Invalid bid mint state')
+    // @ts-ignore
+    if (!this.poolData.actions[askMintIndex]['active'])
+      throw new Error('Invalid ask mint state')
+
     const weightIn = calcNormalizedWeight(
       this.poolData.weights,
       this.poolData.weights[bidMintIndex],
@@ -94,8 +106,6 @@ export class BalansolAmm implements Amm {
     const feeRatio = totalFeeRatio.toNumber() / 10 ** 9
     const feeAmount = (amountOut / (1 - feeRatio)) * feeRatio
 
-    console.log('amountOut', amountOut)
-    console.log('OK')
     return {
       notEnoughLiquidity: false,
       inAmount: amount,
@@ -108,6 +118,40 @@ export class BalansolAmm implements Amm {
   }
 
   createSwapInstructions(swapParams: SwapParams): TransactionInstruction[] {
-    return []
+    if (!this.poolData) throw new Error('Invalid Pool Data')
+    const bidAmount = swapParams.amount || new BN(0)
+    const limit = swapParams.otherAmountThreshold
+
+    const bidMintIdx = this.poolData.mints.findIndex((mint) =>
+      mint.equals(swapParams.sourceMint),
+    )
+    const askMintIdx = this.poolData.mints.findIndex((mint) =>
+      mint.equals(swapParams.destinationMint),
+    )
+
+    const ixSwap = BALANSOL_PROGRAM.instruction.swap(bidAmount, limit, {
+      accounts: {
+        authority: swapParams.userTransferAuthority,
+        pool: this.id,
+        taxMan: this.poolData.taxMan,
+        dstTokenAccountTaxman: this.params.taxmanTokenAccounts[askMintIdx],
+        // bid mint
+        bidMint: swapParams.sourceMint,
+        treasurer: this.params.treasurer,
+        srcTreasury: this.poolData.treasuries[bidMintIdx],
+        srcAssociatedTokenAccount: swapParams.userSourceTokenAccount,
+        // ask mint
+        askMint: swapParams.destinationMint,
+        dstTreasury: this.poolData.treasuries[askMintIdx],
+        dstAssociatedTokenAccount: swapParams.userDestinationTokenAccount,
+        //dstTreasurer: listMintInfo[1].treasurer,
+        rent: web3.SYSVAR_RENT_PUBKEY,
+        systemProgram: web3.SystemProgram.programId,
+        associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      },
+    })
+
+    return [ixSwap]
   }
 }

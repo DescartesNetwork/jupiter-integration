@@ -1,129 +1,227 @@
-import { BN } from "@project-serum/anchor";
-import { IdlAccounts } from "@project-serum/anchor/dist/cjs/program/namespace/types";
+import { BN } from '@project-serum/anchor'
+import { IdlAccounts } from '@project-serum/anchor/dist/cjs/program/namespace/types'
+import { PublicKey } from '@solana/web3.js'
+
+export type BalansolMarketParams = {
+  treasurer: PublicKey
+  taxmanTokenAccounts: PublicKey[]
+}
 
 export type PoolPairData = {
-  balanceIn: BN;
-  balanceOut: BN;
-  weightIn: number;
-  weightOut: number;
-  swapFee: BN;
-};
+  balanceIn: BN
+  balanceOut: BN
+  weightIn: number
+  weightOut: number
+  swapFee: BN
+}
 
-export type PoolData = IdlAccounts<BalancerAmm>["pool"];
+export type PoolData = IdlAccounts<BalancerAmm>['pool']
 
 export type BalancerAmm = {
-  version: "0.1.0";
-  name: "balancer_amm";
-  instructions: [];
+  version: '0.1.0'
+  name: 'balancer_amm'
+  instructions: [
+    {
+      name: 'swap'
+      accounts: [
+        {
+          name: 'authority'
+          isMut: true
+          isSigner: true
+        },
+        {
+          name: 'pool'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'taxMan'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'bidMint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'treasurer'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'srcTreasury'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'srcAssociatedTokenAccount'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'askMint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'dstTreasury'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'dstAssociatedTokenAccount'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'dstTokenAccountTaxman'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'systemProgram'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'tokenProgram'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'associatedTokenProgram'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'rent'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'bidAmount'
+          type: 'u64'
+        },
+        {
+          name: 'limit'
+          type: 'u64'
+        },
+      ]
+      returns: 'u64'
+    },
+  ]
   accounts: [
     {
-      name: "pool";
+      name: 'pool'
       type: {
-        kind: "struct";
+        kind: 'struct'
         fields: [
           {
-            name: "authority";
-            type: "publicKey";
+            name: 'authority'
+            type: 'publicKey'
           },
           {
-            name: "fee";
-            type: "u64";
+            name: 'fee'
+            type: 'u64'
           },
           {
-            name: "taxFee";
-            type: "u64";
+            name: 'taxFee'
+            type: 'u64'
           },
           {
-            name: "state";
+            name: 'state'
             type: {
-              defined: "PoolState";
-            };
+              defined: 'PoolState'
+            }
           },
           {
-            name: "mintLpt";
-            type: "publicKey";
+            name: 'mintLpt'
+            type: 'publicKey'
           },
           {
-            name: "taxMan";
-            type: "publicKey";
+            name: 'taxMan'
+            type: 'publicKey'
           },
           {
-            name: "mints";
+            name: 'mints'
             type: {
-              vec: "publicKey";
-            };
+              vec: 'publicKey'
+            }
           },
           {
-            name: "actions";
+            name: 'actions'
             type: {
               vec: {
-                defined: "MintActionState";
-              };
-            };
+                defined: 'MintActionState'
+              }
+            }
           },
           {
-            name: "treasuries";
+            name: 'treasuries'
             type: {
-              vec: "publicKey";
-            };
+              vec: 'publicKey'
+            }
           },
           {
-            name: "reserves";
+            name: 'reserves'
             type: {
-              vec: "u64";
-            };
+              vec: 'u64'
+            }
           },
           {
-            name: "weights";
+            name: 'weights'
             type: {
-              vec: "u64";
-            };
-          }
-        ];
-      };
-    }
-  ];
+              vec: 'u64'
+            }
+          },
+        ]
+      }
+    },
+  ]
   types: [
     {
-      name: "PoolState";
+      name: 'PoolState'
       type: {
-        kind: "enum";
+        kind: 'enum'
         variants: [
           {
-            name: "Uninitialized";
+            name: 'Uninitialized'
           },
           {
-            name: "Initialized";
+            name: 'Initialized'
           },
           {
-            name: "Frozen";
+            name: 'Frozen'
           },
           {
-            name: "Deleted";
-          }
-        ];
-      };
+            name: 'Deleted'
+          },
+        ]
+      }
     },
     {
-      name: "MintActionState";
+      name: 'MintActionState'
       type: {
-        kind: "enum";
+        kind: 'enum'
         variants: [
           {
-            name: "Active";
+            name: 'Active'
           },
           {
-            name: "BidOnly";
+            name: 'BidOnly'
           },
           {
-            name: "AskOnly";
+            name: 'AskOnly'
           },
           {
-            name: "Paused";
-          }
-        ];
-      };
-    }
-  ];
-  errors: [];
-};
+            name: 'Paused'
+          },
+        ]
+      }
+    },
+  ]
+  errors: []
+}

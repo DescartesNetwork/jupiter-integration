@@ -1,15 +1,107 @@
-import { Program } from '@project-serum/anchor'
-import { AnchorProvider, web3 } from '@project-serum/anchor'
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet'
+import { AnchorProvider, web3, Program } from '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
+import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet'
 
 import { SOLANA_RPC_ENDPOINT } from '../constants'
+
 import { BalancerAmm } from './type'
 
 export const IDL: BalancerAmm = {
   version: '0.1.0',
   name: 'balancer_amm',
-  instructions: [],
+  instructions: [
+    {
+      name: 'swap',
+      accounts: [
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'pool',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'taxMan',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'bidMint',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'treasurer',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'srcTreasury',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'srcAssociatedTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'askMint',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'dstTreasury',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'dstAssociatedTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'dstTokenAccountTaxman',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'associatedTokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'bidAmount',
+          type: 'u64',
+        },
+        {
+          name: 'limit',
+          type: 'u64',
+        },
+      ],
+      returns: 'u64',
+    },
+  ],
   accounts: [
     {
       name: 'pool',

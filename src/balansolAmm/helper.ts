@@ -1,4 +1,7 @@
-import { BN } from '@project-serum/anchor'
+import { BN, utils } from '@project-serum/anchor'
+import { PublicKey } from '@solana/web3.js'
+
+import { BALANSOL_PROGRAM, BALANSOL_PROGRAM_ID } from '../balansolAmm/constant'
 import { PoolPairData } from './type'
 
 const PRECISION = 10 ** 9
@@ -59,6 +62,49 @@ export const calcPriceImpactSwap = (
   if (spotPriceAfterSwap < currentSpotPrice) return 0
   const impactPrice = 1 - currentSpotPrice / spotPriceAfterSwap
   return impactPrice
+}
+
+export const getBalansolParams = async (
+  poolPublicKey: PublicKey,
+  taxMan: PublicKey,
+  mints: PublicKey[],
+): Promise<{ treasurer: PublicKey; taxmanTokenAccounts: PublicKey[] }> => {
+  const [treasurer] = await PublicKey.findProgramAddress(
+    [Buffer.from('treasurer'), poolPublicKey.toBuffer()],
+    BALANSOL_PROGRAM_ID,
+  )
+  const taxmanTokenAccounts = await Promise.all(
+    mints.map((mint) => utils.token.associatedAddress({ mint, owner: taxMan })),
+  )
+  return { treasurer, taxmanTokenAccounts }
+}
+
+export const getBalansolMarkets = async () => {
+  const pools = await BALANSOL_PROGRAM.account.pool.all()
+  // Get Account Data
+  const markets = await Promise.all(
+    pools.map(async (pool) => {
+      // Build Data
+      const poolData = pool.account
+      const buff = await BALANSOL_PROGRAM.coder.accounts.encode(
+        'pool',
+        pool.account,
+      )
+      // Build Params
+      const params = await getBalansolParams(
+        pool.publicKey,
+        poolData.taxMan,
+        poolData.mints,
+      )
+      return {
+        owner: BALANSOL_PROGRAM_ID.toBase58(),
+        pubkey: pool.publicKey.toBase58(),
+        data: [buff.toString('base64'), 'base64'],
+        params,
+      }
+    }),
+  )
+  return markets
 }
 
 export const utilsBN = {
