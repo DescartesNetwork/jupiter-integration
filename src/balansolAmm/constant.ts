@@ -220,6 +220,8 @@ export const BALANSOL_PROGRAM_ID = new PublicKey(
   'D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag',
 )
 
+export const PRECISION = 10 ** 9
+
 export const PROVIDER = new AnchorProvider(
   new web3.Connection(SOLANA_RPC_ENDPOINT),
   new NodeWallet(web3.Keypair.generate()),

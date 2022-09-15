@@ -2,10 +2,8 @@ import { BN, utils } from '@project-serum/anchor'
 import { PublicKey } from '@solana/web3.js'
 
 // Balansol AMM
-import { BALANSOL_PROGRAM, BALANSOL_PROGRAM_ID } from './constant'
+import { BALANSOL_PROGRAM, BALANSOL_PROGRAM_ID, PRECISION } from './constant'
 import { PoolPairData } from './type'
-
-const PRECISION = 10 ** 9
 
 export const calcOutGivenInSwap = (
   amountIn: number,
@@ -82,7 +80,7 @@ export const getBalansolParams = async (
 
 export const getBalansolMarkets = async () => {
   const pools = await BALANSOL_PROGRAM.account.pool.all()
-  // Get Account Data
+  // Parser Account Data
   const markets = await Promise.all(
     pools.map(async (pool) => {
       // Build Data
