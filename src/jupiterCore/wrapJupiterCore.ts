@@ -1,10 +1,10 @@
-import { BALANSOL_PROGRAM } from './../myAmm/constant'
+import { BALANSOL_PROGRAM } from '../balansolAmm/constant'
 
 import { AccountInfo, PublicKey, Connection } from '@solana/web3.js'
 import { Amm } from '@jup-ag/core'
 
-import { BALANSOL_PROGRAM_ID } from '../myAmm/constant'
-import { BalansolAmm } from '../myAmm'
+import { BALANSOL_PROGRAM_ID } from '../balansolAmm/constant'
+import { BalansolAmm } from '../balansolAmm'
 import { SOLANA_RPC_ENDPOINT } from '../constants'
 import { AccountInfoMap } from './type'
 
