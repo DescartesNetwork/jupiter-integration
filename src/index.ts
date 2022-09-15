@@ -86,6 +86,7 @@ const getRoutes = async ({
     if (routes && routes.routesInfos.length) {
       console.log('Possible number of routes:', routes.routesInfos.length)
       const bestRoute = routes.routesInfos[0]
+      console.log('bestRoute', bestRoute)
       console.log(
         'Best quote: ',
         // @ts-ignore
@@ -182,7 +183,6 @@ const main = async () => {
       slippage: 1, // 1% slippage
     })
 
-    console.log('routes', routes)
     // Routes are sorted based on outputAmount, so ideally the first route is the best.
     // @ts-ignore
     await executeSwap({ jupiter, routeInfo: routes!.routesInfos[0] })

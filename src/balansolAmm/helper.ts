@@ -15,9 +15,9 @@ export const calcOutGivenInSwap = (
   weightIn: number,
   swapFee: BN,
 ) => {
-  const numBalanceOut = utilsBN.toNumber(balanceOut)
-  const numBalanceIn = utilsBN.toNumber(balanceIn)
-  const numSwapFee = utilsBN.toNumber(swapFee) / PRECISION
+  const numBalanceOut = Number(balanceOut.toString())
+  const numBalanceIn = Number(balanceIn.toString())
+  const numSwapFee = Number(swapFee.toString()) / PRECISION
   const ratioBeforeAfterBalance = numBalanceIn / (numBalanceIn + amountIn)
   const ratioInOutWeight = weightIn / weightOut
   return (
@@ -43,11 +43,11 @@ export const calcSpotPriceExactInSwap = (
 ) => {
   const { balanceIn, balanceOut, weightIn, weightOut, swapFee } = poolPairData
   // TODO: Consider whether use decimal or not here
-  const Bi = utilsBN.toNumber(balanceIn)
-  const Bo = utilsBN.toNumber(balanceOut)
+  const Bi = Number(balanceIn.toString())
+  const Bo = Number(balanceOut.toString())
   const wi = weightIn
   const wo = weightOut
-  const f = utilsBN.toNumber(swapFee) / PRECISION
+  const f = Number(swapFee.toString()) / PRECISION
   return -(
     (Bi * wo) /
     (Bo * (-1 + f) * (Bi / (amount + Bi - amount * f)) ** ((wi + wo) / wo) * wi)
@@ -106,30 +106,4 @@ export const getBalansolMarkets = async () => {
     }),
   )
   return markets
-}
-
-export const utilsBN = {
-  /**
-   * Add decimals to the number
-   * @param num
-   * @param decimals
-   * @returns
-   */
-  decimalize: (num: string | number, decimals: number): BN => {
-    if (!num) return new BN(0)
-    if (decimals < 0 || decimals % 1 !== 0)
-      throw new Error('decimals must be an integer greater than zero')
-    const n = num.toString()
-    if (!decimals) return new BN(n)
-    const m = n.split('.')
-    if (m.length > 2) throw new Error('Invalid number')
-    if (m.length === 1) return new BN(num).mul(new BN(10 ** decimals))
-    if (m[1].length >= decimals)
-      return new BN(m[0] + m[1].substring(0, decimals))
-    else return new BN(m[0] + m[1] + '0'.repeat(decimals - m[1].length))
-  },
-
-  toNumber: (numBN: BN): number => {
-    return Number(numBN.toString())
-  },
 }
