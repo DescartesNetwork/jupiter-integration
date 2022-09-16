@@ -151,6 +151,15 @@ export class BalansolAmm implements Amm {
         associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID,
       },
+      remainingAccounts: swapParams.platformFee?.feeAccount
+        ? [
+            {
+              isSigner: false,
+              isWritable: true,
+              pubkey: swapParams.platformFee.feeAccount,
+            },
+          ]
+        : [],
     })
 
     return [ixSwap]
